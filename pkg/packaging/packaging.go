@@ -2,6 +2,7 @@
 package packaging
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -47,12 +48,16 @@ type Options struct {
 	UpdateRoots string
 	// Debug determines whether to enable debug logging for the agent.
 	Debug bool
+	// OsqueryFlags is a path to a `osqery.flags.default` file to include in the package.
+	OsqueryFlags string
+	// OsqueryConf is a path to a `osquery.conf` to include in the package.
+	OsqueryConf string
 }
 
 func copyFile(srcPath, dstPath string, perm os.FileMode) error {
 	src, err := os.Open(srcPath)
 	if err != nil {
-		return errors.Wrap(err, "open src for copy")
+		return fmt.Errorf("open src for copy `%s` : %w", srcPath, err)
 	}
 	defer src.Close()
 
@@ -117,15 +122,15 @@ func writeSecret(opt Options, orbitRoot string) error {
 }
 
 func chmodRecursive(path string, perm os.FileMode) error {
-		return filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
-			if err != nil {
-				return errors.Wrap(err, "walk error")
-			}
+	return filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return errors.Wrap(err, "walk error")
+		}
 
-			if err := os.Chmod(path, perm); err != nil {
-				return errors.Wrap(err, "chmod")
-			}
+		if err := os.Chmod(path, perm); err != nil {
+			return errors.Wrap(err, "chmod")
+		}
 
-			return nil
-		})
+		return nil
+	})
 }

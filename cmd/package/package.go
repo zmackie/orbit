@@ -104,6 +104,16 @@ func main() {
 			Usage:       "Enable debug logging",
 			Destination: &opt.Debug,
 		},
+		&cli.StringFlag{
+			Name:        "osquery-flags",
+			Usage:       "Path to `osquery.flags.default` file",
+			Destination: &opt.OsqueryFlags,
+		},
+		&cli.StringFlag{
+			Name:        "osquery-conf",
+			Usage:       "Path to `osquery.conf` file",
+			Destination: &opt.OsqueryConf,
+		},
 	}
 	app.Before = func(c *cli.Context) error {
 		if opt.Debug {

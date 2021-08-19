@@ -71,6 +71,18 @@ func buildNFPM(opt Options, pkger nfpm.Packager) error {
 		}
 	}
 
+	if opt.OsqueryFlags != "" {
+		if err := writeFlags(opt, filesystemRoot); err != nil {
+			return errors.Wrap(err, "write flags file")
+		}
+	}
+
+	if opt.OsqueryConf != "" {
+		if err := writeConf(opt, filesystemRoot); err != nil {
+			return errors.Wrap(err, "write conf file")
+		}
+	}
+
 	// Pick up all file contents
 
 	contents := files.Contents{
@@ -231,6 +243,32 @@ func writePostInstall(opt Options, path string) error {
 
 	if err := ioutil.WriteFile(path, contents.Bytes(), constant.DefaultFileMode); err != nil {
 		return errors.Wrap(err, "write file")
+	}
+
+	return nil
+}
+
+func writeFlags(opt Options, fileSystemRoot string) error {
+	dstRoot := filepath.Join(fileSystemRoot, "etc", "osquery")
+	if err := os.MkdirAll(dstRoot, constant.DefaultDirMode); err != nil {
+		return errors.Wrap(err, "create osqery dir")
+	}
+
+	if err := copyFile(opt.OsqueryFlags, filepath.Join(dstRoot, "osquery.flags.default"), 0644); err != nil {
+		return errors.Wrap(err, "write osquery flags")
+	}
+
+	return nil
+}
+
+func writeConf(opt Options, fileSystemRoot string) error {
+	dstRoot := filepath.Join(fileSystemRoot, "etc", "osquery")
+	if err := os.MkdirAll(dstRoot, constant.DefaultDirMode); err != nil {
+		return errors.Wrap(err, "create osquery")
+	}
+
+	if err := copyFile(opt.OsqueryConf, filepath.Join(dstRoot, "osquery.conf"), 0644); err != nil {
+		return errors.Wrap(err, "write osquery conf")
 	}
 
 	return nil
